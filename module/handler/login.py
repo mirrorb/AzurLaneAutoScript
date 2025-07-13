@@ -8,10 +8,12 @@ from uiautomator2.xpath import XPath, XPathSelector
 
 import module.config.server as server
 from module.base.timer import Timer
-from module.base.utils import color_similarity_2d, crop, random_rectangle_point
+from module.base.utils import color_similarity_2d, crop, random_rectangle_point, random_normal_distribution_int
 from module.handler.assets import *
 from module.logger import logger
 from module.map.assets import *
+from module.template.assets import TEMPLATE_LOGIN_4399_FLOATING_BALL_L, TEMPLATE_LOGIN_4399_FLOATING_BALL_R, \
+    TEMPLATE_LOGIN_4399_FLOATING_BALL_T, TEMPLATE_LOGIN_4399_FLOATING_BALL_B
 from module.ui.assets import *
 from module.ui.page import page_campaign_menu
 from module.ui.ui import UI
@@ -80,6 +82,10 @@ class LoginHandler(UI):
                 continue
             if server.server == 'cn' and not login_success:
                 if self.handle_cn_user_agreement():
+                    continue
+            # CN 4399 floating ball
+            if self.device.package == 'com.bilibili.blhx.m4399' and not login_success:
+                if self.handle_4399_floating_ball():
                     continue
             # Player return
             if self.appear_then_click(LOGIN_RETURN_SIGN, offset=(30, 30), interval=5):
@@ -252,6 +258,48 @@ class LoginHandler(UI):
             AGREE = Button(area=agree_wait_results, color=(), button=agree_wait_results, name='AGREE')
             self.device.click(AGREE)
             return True
+
+    def handle_4399_floating_ball(self):
+        """
+        For CN 4399 only.
+        Hide floating ball on login.
+
+        Returns:
+            bool: If handled.
+        """
+        sim, floating_ball = TEMPLATE_LOGIN_4399_FLOATING_BALL_L.match_result(
+            image = self.device.image,
+            name = 'LOGIN_4399_FLOATING_BALL_L')
+        if sim > 0.85:
+            p1 = random_rectangle_point(floating_ball.area)
+            p2 = random_rectangle_point((400, 570, 880, 650))
+            self.device.swipe(p1, p2)
+            return True
+        sim, floating_ball = TEMPLATE_LOGIN_4399_FLOATING_BALL_R.match_result(
+            image = self.device.image,
+            name = 'LOGIN_4399_FLOATING_BALL_R')
+        if sim > 0.85:
+            p1 = random_rectangle_point(floating_ball.area)
+            p2 = random_rectangle_point((400, 570, 880, 650))
+            self.device.swipe(p1, p2)
+            return True
+        sim, floating_ball = TEMPLATE_LOGIN_4399_FLOATING_BALL_T.match_result(
+            image = self.device.image,
+            name = 'LOGIN_4399_FLOATING_BALL_T')
+        if sim > 0.85:
+            p1 = random_rectangle_point(floating_ball.area)
+            p2 = random_rectangle_point((400, 570, 880, 650))
+            self.device.swipe(p1, p2)
+            return True
+        sim, floating_ball = TEMPLATE_LOGIN_4399_FLOATING_BALL_B.match_result(
+            image = self.device.image,
+            name = 'LOGIN_4399_FLOATING_BALL_B')
+        if sim > 0.85:
+            p1 = random_rectangle_point(floating_ball.area)
+            p2 = random_rectangle_point((400, 570, 880, 650))
+            self.device.swipe(p1, p2)
+            return True
+        return False
 
     def handle_user_login(self, xp, hierarchy) -> bool:
         login_wait_results = self.get_for_any_ele([
